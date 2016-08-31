@@ -42,7 +42,7 @@ def __get_url__(symbol, period, start_date, end_date, verbose=False):
     #'http://195.128.78.52/table.csv?market=1&em=3&code=SBER&df=9&mf=11&yf=2013&dt=9&mt=11&yt=2013&p=1&f=table&e=.csv&cn=SBER&dtf=1&tmf=1&MSOR=0&mstime=on&mstimever=1&sep=3&sep2=1&datf=9&at=1'
     #'http://195.128.78.52/table.csv?d=d&market=1&f=table&e=.csv&dtf=1&tmf=3&MSOR=0&mstime=on&mstimever=1&sep=3&sep2=1&at=1&em=20509&p=1&mf=10&cn=FEES&mt=10&df=22&dt=22&yt=2013&yf=2013&datf=11'
     #finam_URL = "/table.csv?d=d&market=1&f=table&e=.csv&dtf=1&tmf=1&MSOR=0&sep=1&sep2=1&at=1&"
-    finam_URL = "/table.csv?d=d&market=1&f=table&e=.csv&dtf=1&tmf=3&MSOR=0&mstime=on&mstimever=1&sep=3&sep2=1&at=1&"
+    finam_URL = "/table.csv?d=d&market=1&f=table&e=.csv&dtf=1&tmf=1&MSOR=1&mstime=on&mstimever=1&sep=1&sep2=1&at=1&"
     #'/table.csv?d=d&market=1&f=table&e=.csv&dtf=1&tmf=3&MSOR=0&mstime=on&mstimever=1&sep=3&sep2=1&at=1'
     symb = __get_finam_code__(symbol, verbose)
     params = urlencode({"p": period, "em": symb,
@@ -54,7 +54,7 @@ def __get_url__(symbol, period, start_date, end_date, verbose=False):
 
     stock_URL = finam_URL + params
     s = "http://" + finam_HOST + stock_URL
-    s = s + ('&datf=11' if period == periods['tick'] else '&datf=5')
+    s = s + ('&datf=11' if period == periods['tick'] else '&datf=1')
     __print__(s, verbose)
     return s
 
@@ -72,8 +72,9 @@ def __get_daily_quotes_finam__(symbol, start_date='20070101',
     start_date = datetime.strptime(start_date, "%Y%m%d").date()
     end_date = datetime.strptime(end_date, "%Y%m%d").date()
     url = __get_url__(symbol, __period__(period), start_date, end_date, verbose)
-    pdata = read_csv(url, index_col=0, parse_dates={'index': [0, 1]}, sep=';').sort_index()
-    pdata.columns = [symbol + '.' + i for i in ['Open', 'High', 'Low', 'Close', 'Vol']]
+    #pdata = read_csv(url, index_col=0, parse_dates={'index': [0, 1]}, sep=';').sort_index()
+    pdata = read_csv(url)
+    #pdata.columns = [symbol + '.' + i for i in ['Open', 'High', 'Low', 'Close', 'Vol']]
     return pdata
 
 
@@ -96,8 +97,9 @@ def get_quotes_finam(symbol, start_date='20070101',
         start_date = datetime.strptime(start_date, "%Y%m%d").date()
         end_date = datetime.strptime(end_date, "%Y%m%d").date()
         url = __get_url__(symbol, __period__(period), start_date, end_date, verbose)
-        pdata = read_csv(url, index_col=0, parse_dates={'index': [0, 1]}, sep=';').sort_index()
-        pdata.columns = [symbol + '.' + i for i in ['Open', 'High', 'Low', 'Close', 'Vol']]
+        #pdata = read_csv(url, index_col=0, parse_dates={'index': [0, 1]}, sep=';').sort_index()
+    	pdata = read_csv(url)
+        #pdata.columns = [symbol + '.' + i for i in ['Open', 'High', 'Low', 'Close', 'Vol']]
         return pdata
 
 
@@ -113,7 +115,8 @@ def __get_tick_quotes_finam__(symbol, start_date, end_date, verbose=False):
         req.add_header('Referer', 'http://www.finam.ru/analysis/profile0000300007/default.asp')
         r = urlopen2(req)
         try:
-            tmp_data = read_csv(r, index_col=0, parse_dates={'index': [0, 1]}, sep=';').sort_index()
+            #tmp_data = read_csv(r, index_col=0, parse_dates={'index': [0, 1]}, sep=';').sort_index()
+    	    tmp_data = read_csv(r)
             if data.empty:
                 data = tmp_data
             else:
@@ -121,7 +124,7 @@ def __get_tick_quotes_finam__(symbol, start_date, end_date, verbose=False):
         except Exception:
             print('error on data downloading {} {}'.format(symbol, start_date + day))
 
-    data.columns = [symbol + '.' + i for i in ['Last', 'Vol', 'Id']]
+    #data.columns = [symbol + '.' + i for i in ['Last', 'Vol', 'Id']]
     return data
 
 
@@ -132,7 +135,8 @@ def __get_tick_quotes_finam_all__(symbol, start_date, end_date, verbose=False):
     req = Request(url)
     req.add_header('Referer', 'http://www.finam.ru/analysis/profile0000300007/default.asp')
     r = urlopen(req)
-    pdata = read_csv(r, index_col=0, parse_dates={'index': [0, 1]}, sep=';').sort_index()
+    #pdata = read_csv(r, index_col=0, parse_dates={'index': [0, 1]}, sep=';').sort_index()
+    pdata = read_csv(r)
     pdata.columns = [symbol + '.' + i for i in ['Last', 'Vol', 'Id']]
     return pdata
 
