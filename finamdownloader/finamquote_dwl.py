@@ -29,7 +29,7 @@ def __get_finam_code__(symbol, verbose=False):
     data['code'] = codes
     data['market'] = markets
     idx = (data.market != '-1') & (data.market != '3')
-    data = data[idx].sort('market')
+    data = data[idx].sort_values(by='market')
     res = data[data.code == symbol].iloc[0].ids
     if res is None or res == '':
         raise Exception("%s not found\r\n" % symbol)
